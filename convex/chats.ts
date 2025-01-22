@@ -30,9 +30,20 @@ export const deleteChat = mutation({
             throw new Error("Not authenticated")
         }
 
+
+
         const chat = await ctx.db.get(args.id);
         if (!chat || chat.userId !== identity.subject) {
             throw new Error("Unauthorized")
         }
-    }
+
+        const messages = await ctx.db.query("messages").withIndex("by_chat", (q) => q.eq("chatId", args.id))
+
+        for (const message of messages) {
+            await ctx.db.delete(message._id)
+        }
+
+        await ctx.db.delete(args.id)
+    },
 })
+

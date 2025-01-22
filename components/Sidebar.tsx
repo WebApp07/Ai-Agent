@@ -12,6 +12,7 @@ const Sidebar = () => {
   const { closeMobileNav, isMobileNavOpen } = use(NavigationContext);
 
   const createChat = useMutation(api.chats.createChat)
+  const deleteChat =useMutation(api.chats.deleteChat)
 
   const handleClick = () => {
     closeMobileNav();
@@ -21,6 +22,14 @@ const Sidebar = () => {
     const chatId = await createChat({title: "New Chat"})
     router.push(`/dashboard/chat/${chatId}`)
     closeMobileNav()
+  }
+
+  const handleDeleteChat = async (id: Id<"chats">) => {
+    await deleteChat ({id})
+
+    if (window.location.pathname.includes(id)) {
+      router.push("/dashboard")
+    }
   }
 
 
@@ -49,7 +58,11 @@ const Sidebar = () => {
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto space-y-2.5 p-4 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent"></div>
+        <div className="flex-1 overflow-y-auto space-y-2.5 p-4 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+          {chats?.map((chat) => (
+            <ChatRow key={chat._id} chat={chat} onDelete={handleDeleteChat} />
+          ))}
+        </div>
       </div>
     </>
   );
