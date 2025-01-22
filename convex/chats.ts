@@ -1,4 +1,4 @@
-import {mutation} from "./_generated/server"
+import {mutation, query} from "./_generated/server"
 import {v} from "convex/values"
 
 export const createChat = mutation ({
@@ -39,11 +39,25 @@ export const deleteChat = mutation({
 
         const messages = await ctx.db.query("messages").withIndex("by_chat", (q) => q.eq("chatId", args.id))
 
-        for (const message of messages) {
+        for await (const message of messages) {
             await ctx.db.delete(message._id)
         }
 
         await ctx.db.delete(args.id)
     },
+})
+
+export const listChats = query({
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        console.log(identity);
+
+        if (!identity) {
+            throw new Error("Not authenticated");
+        }
+
+        const chats = await ctx.db.query("chats").withIndex("by_user", (q) => q.eq("userId", identity.subject)).order("desc").collect()
+        return chats
+    }
 })
 

@@ -4,13 +4,16 @@ import { useRouter } from "next/navigation";
 import React, { use } from "react";
 import { Button } from "./ui/button";
 import { PlusIcon } from "@radix-ui/react-icons";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 const Sidebar = () => {
   const router = useRouter();
   const { closeMobileNav, isMobileNavOpen } = use(NavigationContext);
 
+
+  const chats = useQuery(api.chats.listChats)
   const createChat = useMutation(api.chats.createChat)
   const deleteChat =useMutation(api.chats.deleteChat)
 
