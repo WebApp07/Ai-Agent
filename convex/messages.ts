@@ -1,6 +1,5 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
-const SHOW_COMMENTS = true;
+import { mutation, query } from "./_generated/server";
 
 export const list = query({
   args: { chatId: v.id("chats") },
@@ -16,13 +15,27 @@ export const list = query({
       .order("asc")
       .collect();
 
-    if (SHOW_COMMENTS) {
-      console.log("📜 Retrieved messages:", {
-        chatId: args.chatId,
-        count: messages.length,
-      });
-    }
+    
 
     return messages;
   },
 });
+
+
+export const send = mutation ({
+    args: {
+        chatId: v.id("chats"),
+        content: v.string(),
+    },
+    handler: async (ctx, args) => {
+        // Save the user message with preserved newlines
+        const messageId = await ctx.db.insert("messages", {
+            chatId: args.chatId,
+            content: args.content.replace(/\n/g, "\\n"),
+            role: "user",
+            createdAt: Date.now(),
+        });
+
+        return messageId
+    },
+})
