@@ -39,3 +39,26 @@ export const send = mutation ({
         return messageId
     },
 })
+
+
+
+export const store = mutation ({
+    args: {
+        chatId: v.id("chats"),
+        content: v.string(),
+        role: v.union(v.literal("user"), v.literal("assistant"))
+    },
+
+    handler : async (ctx, args) => {
+        // Store message with preserved newlines amd HTML
+        const messageId = await ctx.db.insert("messages", {
+            chatId: args.chatId,
+            content: args.content.replace(/\\/g, "\\\\"),
+            createdAt: Date.now(),
+            role: args.role
+        });
+
+        return messageId
+
+    }
+})
